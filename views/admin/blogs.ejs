@@ -1,0 +1,91 @@
+<style>
+    .title {
+        text-align: center;
+        margin-top: 3rem;
+        font-size: 4rem;
+    }
+</style>
+
+<div class="container">
+    <h1 class="title">Bloglar</h1>
+    <hr>
+    <div>
+        <table class="table table-dark">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Blog Adı</th>
+              <th scope="col">Tarih</th>
+              <th scope="col">Aktif mi?</th>
+              <th scope="col">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%blogs.forEach((blog, i) => {%>
+                <tr>
+                  <th scope="row"><%=i+1%></th>
+                  <td><%=blog.name%></td>
+                  <td id="blog-date-<%=i%>"></td>
+                  <td id="blog<%=i%>"><%-blog.active ? `<i id="blog_active" style="font-size: 1.6rem; cursor: pointer;" onclick="blogDeactive('${blog._id}', 'blog${i}')" class="bi bi-toggle-on"></i>` : `<i id="blog_active" style="font-size: 1.6rem; cursor: pointer;" onclick="blogActive('${blog._id}', 'blog${i}')" class="bi bi-toggle-off"></i>`%>
+                  <i id="success-icon" style="font-size: 1.3rem; display: none;" class="bi bi-check2-circle text-success"></i>
+                  </td>
+                  <td>
+                    <a class="btn btn-sm btn-primary" href="/admin/blog/edit/<%=blog._id%>">Düzenle</a>
+                    <a class="btn btn-sm btn-danger">Sil</a>
+                  </td>
+                </tr>
+            <%})%>
+          </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const blogs = <%-JSON.stringify(blogs)%>;
+    
+    blogs.forEach((blog, i) => {
+        $('#blog-date-'+i).html(timeAgo(new Date(blog.createdAt)));
+    });
+    
+    function successIcon(i){
+        $(i+'#success-icon').show();
+        
+        setTimeout(() => $(i+'#success-icon').hide(), 1000);
+        
+        if($(i+'#blog_active').attr("class").indexOf(i+"bi-toggle-on") !== -1){
+            $(i+'#blog_active').removeClass(i+"bi-toggle-on");
+            $(i+'#blog_active').addClass(i+"bi-toggle-off");
+        }else if($('#blog_active').attr("class").indexOf(i+"bi-toggle-off") !== -1){
+            $(i+'#blog_active').removeClass(i+"bi-toggle-off");
+            $(i+'#blog_active').addClass(i+"bi-toggle-on");
+        }
+    }
+    
+    function blogActive(id, i){
+        $.ajax({
+           method: "POST",
+           url: "/admin/blog/active",
+           data: {
+               id: id
+           },
+           success: function(data){
+               if(data.status !== 200) return alert(data.message);
+               successIcon("#"+i);
+           }
+        });
+    }
+    
+    function blogDeactive(id, i){
+        $.ajax({
+           method: "POST",
+           url: "/admin/blog/deactive",
+           data: {
+               id: id
+           },
+           success: function(data){
+               if(data.status !== 200) return alert("Bir hata oluştu!");
+               successIcon("#"+i);
+           }
+        });
+    }
+</script>

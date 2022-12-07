@@ -1,0 +1,41 @@
+<style>
+    .title {
+        text-align: center;
+        margin-top: 3rem;
+        font-size: 4rem;
+    }
+    
+    .col-6 .card {
+        background-color: rgba(var(--bs-light-rgb),var(--bs-bg-opacity));
+        cursor: pointer;
+        text-decoration: none;
+        color: #000;
+    }
+    
+    .col-6 .card:hover {
+        background-color: #999;
+    }
+    
+    .col-6 .card h3 {
+        font-size: 2rem;
+    }
+</style>
+
+<div class="container">
+    <h1 class="title">Yönetici Paneli</h1>
+    <br>
+    <div class="row">
+        <div class="col-6">
+            <a href="/admin/blogs" class="card card-body">
+                <h3>Blogları Yönet</h3>
+                <p>Blogları yönet ister düzenle, ister kaldır.</p>
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="/admin/new-blog" class="card card-body">
+                <h3>Yeni Blog</h3>
+                <p>Yeni bir blog yazmaya başla.</p>
+            </a>
+        </div>
+    </div>
+</div>

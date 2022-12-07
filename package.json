@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "autoprefixer": "^10.4.13",
+    "bad-words": "^3.0.4",
+    "body-parser": "^1.20.0",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^4.6.0",
+    "dotenv": "^16.0.2",
+    "ejs": "^3.1.8",
+    "express": "^4.18.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-fileupload": "^1.4.0",
+    "express-session": "^1.17.3",
+    "mongoose": "^6.6.1",
+    "postcss": "^8.4.19",
+    "tailwindcss": "^3.2.4"
+  },
+  "name": "blog",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "devcss": "postcss public/src/css/tailwind.css -o public/src/css/tailwind-styles.css -w",
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

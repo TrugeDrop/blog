@@ -1,0 +1,52 @@
+<div class="flex items-center justify-center mt-16">
+  <div class="w-11/12 lg:w-9/12">
+    <div class="m-auto">
+      <div class="w-full md:w-2/5 float-left">
+        <div class="transition-all block p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 hover:border-violet-600">
+            <div class="flex flex-col justify-center items-center">
+                <img src="/img/trugedrop.webp" class="w-24 h-24 rounded-full mb-4">
+                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">TrugeDrop</h5>
+                <p class="font-normal text-gray-700 dark:text-gray-400">Web Geliştirici</p>
+            </div>
+        </div>
+      </div>
+      <div class="w-full md:w-3/5 float-right mt-6 md:pl-6 md:!mt-0">
+        <div class="grid grid-rows-2 md:grid-rows-3 gap-4" id="blogs"></div>
+        <a href="/blogs" class="mt-5 float-right font-bold text-blue-600 dark:text-blue-500 hover:underline">Tüm Bloglar...</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    const admin = <%-admin ? true : false%>;
+    
+    $.ajax({
+       type: "POST",
+       url: "/blogs",
+       data: {
+           count: 9
+       },
+       success: function(result){
+           result.forEach(blog => {
+              $('#blogs').append(`
+
+<div class="flex flex-col items-center bg-white border rounded-lg shadow-md md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <img class="object-cover m-6 rounded-lg w-44 h-44 md:w-32 md:h-32" src="${blog.thumbnail}" alt="">
+    <div class="flex flex-col items-start justify-between p-4 leading-normal w-80">
+        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">${blog.name}</h5>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">${blog.description}</p>
+
+        <a href="/blog/${blog.slug_name}" class="mb-2 md:!mb-0 float-right items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Devamını oku...
+        </a>
+    </div>
+</div>`);
+               
+               blog.tags.forEach(tag => {
+                    $("#tags-"+blog.slug_name).append(`<span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">${tag}</span>`);
+                });
+           });
+       }
+    });
+</script>

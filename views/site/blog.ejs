@@ -1,0 +1,221 @@
+<meta name="description" content="<%=blog.description%>">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+
+<style>
+    h3 {
+        font-size: 1.7rem;
+        font-weight: bold; 
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    pre {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    @media screen and (max-width: 580px){
+        .col-6 { width: 100%; }
+        #comments .btn { width: 100%; margin-top: 1rem; }
+    }
+</style>
+
+<div class="main mt-5 m-auto">
+    <h1 class="text-center title"><%=blog.name%></h1>
+    <div class="text-center">
+        <%blog.tags.forEach(tag => {%>
+            <span class="badge"><%=tag%></span>
+        <%})%>
+    </div>
+    <b class="text-center mt-4 block mb-3"><span id="date"></span> - <%=blog.views.length%> Görüntülenme</b>
+    <hr>
+    <div class="container" style="margin: 3rem 0 4rem 0;">
+        <%-blog.content%>
+    </div>
+    <hr>
+    <div class="mt-7">
+        <h4 class="mb-3 text-xl">Bu Bloğu Beğendiniz mi?</h4>
+        <div class="flex items-center">
+            <span id="like" class="flex items-center">
+                <i class="bx bx-like mr-1" onclick="like()" style="font-size: 1.6rem; cursor: pointer;"></i>
+                <%=blog.like.length%>
+            </span>
+            <span id="dislike" class="flex items-center ml-4">
+                <i class="bx bx-dislike mr-1" onclick="dislike()" style="font-size: 1.6rem; cursor: pointer;"></i>
+                <%=blog.dislike.length%>
+            </span>
+        </div>
+    </div>
+    <div id="sources" class="mt-7">
+        <h2 class="text-xl mb-3">Kaynaklar</h2>
+        <div>
+            <%if(blog.sources.length <= 0){%>
+                <div class="alert alert-primary alert-dismissible">
+                    Kaynak belirtilmedi.
+                </div>
+            <%}else{%>
+                <%blog.sources.forEach(data => {%>
+                    <a href="<%=data%>" target="_blank"><%=data%></a>
+                <%})%>
+            <%}%>
+        </div>
+    </div>
+    <div id="comments" class="mt-7">
+        <h2 class="text-xl mb-3">Yorum Yaz</h2>
+        <div>
+            <form onsubmit="newComment(event)">
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label class="form-label">Adınız <font color="red">*</font></label>
+                        <input type="text" id="name" class="form-control mb-3" required>
+                        <label class="form-label">Email Adresiniz <font color="red">*</font></label>
+                        <input type="email" id="email" class="form-control mb-3" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Mesajınız <font color="red">*</font></label>
+                        <textarea class="form-control" id="message" style="min-height: 8rem;" required></textarea>
+                    </div>
+                </div>
+                <div id="comment-send-success" style="display: none;" class="alert alert-success alert-dismissible fade show">
+                    <i class="bi bi-check-circle me-1" style="font-size: 1.4rem;"></i> Yorumunuz başarıyla gönderildi. Teşekkürler!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <input type="submit" class="btn mt-3">
+            </form>
+        </div>
+        <div class="mt-5">
+            <h2 class="text-xl mb-3">Yorumlar</h2>
+            <div id="messages">
+                <div class="alert alert-primary alert-dismissible">
+                    Hiç yorum yok. İlk yorumu sen yaz!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+<script>
+    hljs.highlightAll();
+    
+    var blog_createdAt = <%-JSON.stringify(blog.createdAt)%>
+        
+    $('#date').html(timeAgo(new Date(blog_createdAt)));
+    
+    function comments(){
+        $.ajax({
+            method: "POST",
+            url: "/comments",
+            data: {
+                blog_id: <%-JSON.stringify(blog._id)%>
+            },
+            success: function(result){
+                if(result.comments.length <= 0) return;
+                $('#messages').html(`<div class="list-group"></div>`);
+                result.comments.forEach(data => {
+                   $('#messages .list-group').append(`<div class="list-group-item list-group-item-action" aria-current="true">
+                    <div class="flex w-100 justify-between">
+                      <h5 class="text-lg mb-2"><i class="bi bi-person"></i> ${data.name}</h5>
+                      <small>${timeAgo(new Date(data.createdAt))}</small>
+                    </div>
+                    <p class="mb-1">${data.message}</p>
+                  </div>`);
+                });
+            }
+        });
+    }
+               
+    comments();
+    
+    function newComment(event){
+        event.preventDefault();
+        
+        $.ajax({
+            method: "POST",
+            url: "/comments/new",
+            data: {
+                blog_id: <%-JSON.stringify(blog._id)%>,
+                name: $('#name').val(),
+                email: $('#email').val(),
+                message: $('#message').val()
+            },
+            success: function(result){
+                if(result.status !== 200) return alert("Bir hata oluştu!");
+                
+                $('#name').val("");
+                $('#email').val("");
+                $('#message').val("");
+                
+                $('#comment-send-success').show();
+                
+                comments();
+            }
+        });
+    }
+        
+    function statistics(){
+        $.ajax({
+            method: "POST",
+            url: "/blog/statistics",
+            data: {
+                blog_id: <%-JSON.stringify(blog._id)%>,
+                user_id: localStorage.getItem("id")
+            },
+            success: function(result){
+                if(result.is_like){
+                    $('#like').html(`<i class="bx bxs-like mr-1" onclick="like()" style="font-size: 1.6rem; cursor: pointer;"></i> ${result.like}`);
+                }else{
+                    $('#like').html(`<i class="bx bx-like mr-1" onclick="like()" style="font-size: 1.6rem; cursor: pointer;"></i> ${result.like}`);
+                }
+                
+                if(result.is_dislike){
+                    $('#dislike').html(`<i class="bx bxs-dislike mr-1" onclick="dislike()" style="font-size: 1.6rem; cursor: pointer;"></i> ${result.dislike}`);
+                }else{
+                    $('#dislike').html(`<i class="bx bx-dislike mr-1" onclick="dislike()" style="font-size: 1.6rem; cursor: pointer;"></i> ${result.dislike}`);
+                }
+            }
+        });
+    }
+        
+    statistics();
+        
+    function like(){
+        $.ajax({
+           method: "POST",
+           url: "/blog/like",
+           data: {
+             blog_id: <%-JSON.stringify(blog._id)%>,
+             user_id: localStorage.getItem("id")
+           },
+           success: function(result){
+               if(result.status !== 200) return alert(result.message);
+               statistics();
+           }
+        });
+    }
+        
+    function dislike(){
+        $.ajax({
+           method: "POST",
+           url: "/blog/dislike",
+           data: {
+             blog_id: <%-JSON.stringify(blog._id)%>,
+             user_id: localStorage.getItem("id")
+           },
+           success: function(result){
+               if(result.status !== 200) return alert(result.message);
+               statistics();
+           }
+        });
+    }
+        
+    $.ajax({
+        method: "POST",
+        url: "/blog/views/add",
+        data: {
+            blog_id: <%-JSON.stringify(blog._id)%>,
+            user_id: localStorage.getItem("id")
+        }
+    });
+</script>

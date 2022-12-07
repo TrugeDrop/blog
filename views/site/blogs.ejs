@@ -1,0 +1,136 @@
+<style>
+    .main {
+        position: relative;
+        z-index: 0;
+        padding: 0 200px;
+        line-height: 26px;
+    }
+    
+    .title {
+        font-size: 60px;
+        line-height: 1;
+        letter-spacing: -.05em;
+        font-weight: 700;
+        margin: 0 0 20px;
+        text-transform: capitalize;
+    }
+    
+    #search {
+        margin: auto;
+        max-width: 480px;
+    }
+    
+    @media screen and (max-width: 580px){
+        .main {
+            padding: 0 10px;
+        }
+    }
+</style>
+
+<div class="flex items-center justify-center mt-16">
+  <div class="w-11/12 lg:w-9/12">
+    <div class="m-auto">
+      <div class="w-full md:w-2/5 float-left">
+        <div class="transition-all block p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 hover:border-indigo-600">
+            <h1 class="text-center text-3xl mb-3">Tüm Bloglar</h1>
+            
+            <input type="search" role="search" placeholder="Blog aratın..." onkeyup="search()" id="search" class="form-control">
+            
+            <div class="text-center mt-5">
+                <span class="badge-yellow" style="cursor: pointer;" onclick="tagFilter(event)">javascript</span>
+                <span class="badge-green" style="cursor: pointer;" onclick="tagFilter(event)">nodejs</span>
+                <span class="badge-blue" style="cursor: pointer;" onclick="tagFilter(event)">python</span>
+                <span class="badge-red" style="cursor: pointer;" onclick="tagFilter(event)">go</span>
+            </div>
+        </div>
+      </div>
+      <div class="w-full md:w-3/5 float-right mt-6 md:pl-6 md:!mt-0">
+        <div class="grid grid-rows-2 md:grid-rows-3 gap-4" id="blogs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    const admin = <%-admin ? true : false%>;
+    
+    $.ajax({
+       type: "POST",
+       url: "/blogs",
+       success: function(result){
+           result.forEach(blog => {
+              $('#blogs').append(`
+
+<div class="blog-item flex flex-col items-center bg-white border rounded-lg shadow-md md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <img class="object-cover m-6 rounded-lg w-44 h-44 md:w-32 md:h-32" src="${blog.thumbnail}" alt="">
+    <div class="flex flex-col items-start justify-between p-4 leading-normal w-80">
+        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">${blog.name}</h5>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">${blog.description}</p>
+
+        <a href="/blog/${blog.slug_name}" class="mb-2 md:!mb-0 float-right items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Devamını oku...
+        </a>
+    </div>
+</div>`);
+               
+               blog.tags.forEach(tag => {
+                    $("#tags-"+blog.slug_name).append(`<span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">${tag}</span>`);
+                });
+           });
+       }
+    });
+    
+    function search(){
+        var input, filter, ul, li, a, i, txtValue;
+          input = document.getElementById('search');
+          filter = input.value.toLowerCase();
+          ul = document.getElementById("blogs");
+          li = ul.getElementsByClassName('blog-item');
+
+        
+          for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("h5")[0];
+              
+            txtValue = a.textContent || a.innerText;
+              
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+              li[i].style.display = "";
+            } else {
+              li[i].style.display = "none";
+            }
+          }
+    }
+    
+    function tagFilter(event){
+        const tag = event.target.innerHTML;
+        
+        $.ajax({
+           type: "POST",
+           url: "/blogs",
+           success: function(result){
+               $('#blogs').html("");
+               
+               result.forEach(blog => {
+                  if(blog.tags.indexOf(tag) === -1) return;
+                  $('#blogs').append(`
+
+<div class="blog-item flex flex-col items-center bg-white border rounded-lg shadow-md md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <img class="object-cover m-6 rounded-lg w-44 h-44 md:w-32 md:h-32" src="${blog.thumbnail}" alt="">
+    <div class="blog-content flex flex-col items-start justify-between p-4 leading-normal w-80">
+        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">${blog.name}</h5>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">${blog.description}</p>
+
+        <a href="/blog/${blog.slug_name}" class="mb-2 md:!mb-0 float-right items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Devamını oku...
+        </a>
+    </div>
+</div>`);
+               
+               blog.tags.forEach(tag => {
+                    $("#tags-"+blog.slug_name).append(`<span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">${tag}</span>`);
+                });
+           });
+           }
+        });
+    }
+</script>

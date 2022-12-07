@@ -1,0 +1,82 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/codemirror.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/theme/monokai.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/codemirror.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/mode/xml/xml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/mode/javascript/javascript.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/mode/css/css.js"></script>
+
+<style>
+    form {
+        min-width: 75%;
+    }
+    
+    .CodeMirror {
+        min-height: 30rem;
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="text-center">Blogu Düzenle</h1>
+    <div class="w-100 d-flex">
+        <form class="m-auto p-5" action="/admin/blog/edit/<%=blog._id%>" method="POST" enctype="multipart/form-data">
+            <label class="form-label">Blog Adı</label>
+            <input type="text" id="name" value="<%=blog.name%>" name="name" class="form-control mb-3" onkeyup="saveValue(event)" required>
+            <label class="form-label">Slug</label>
+            <input type="text" id="slug_name" value="<%=blog.slug_name%>" name="slug_name" class="form-control mb-3" readonly required>
+            <label class="form-label">Thumbnail (Küçük Resim)</label>
+            <img class="img-fluid mb-3 shadow rounded-1" style="max-width: 480px; display: block;" src="<%=blog.thumbnail%>">
+        <!-- <input type="file" id="thumbnail" name="thumbnail" class="form-control mb-3" required> -->
+            <label class="form-label">Açıklama</label>
+            <input type="text" id="description" value="<%=blog.description%>" name="description" class="form-control mb-3" onkeyup="saveValue(event)" required>
+            <label class="form-label">Etiketler</label>
+            <input type="text" id="tags" value="<%=blog.tags%>" name="tags" class="form-control mb-3" placeholder="tag1,tag2,tag3" onkeyup="saveValue(event)" required>
+            <label class="form-label">Kaynaklar</label>
+            <input type="text" id="sources" value="<%=blog.sources%>" name="sources" class="form-control mb-3" placeholder="https://www.w3schools.com,https://developer.mozilla.org" onkeyup="saveValue(event)">
+            <label class="form-label">İçerik</label>
+            <textarea id="editor" name="content"></textarea>
+            
+            <button type="submit" class="btn btn-primary mt-4">Kaydet</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+      lineNumbers: true,
+      mode:  "htmlmixed",
+      htmlMode: true,
+      theme: "monokai"
+    });
+    
+    editor.save();
+    
+    editor.setValue(<%-JSON.stringify(blog.content)%>);
+    
+    editor.on('keyup',function(cMirror){
+        localStorage.setItem("content", cMirror.getValue());
+    });
+    
+    function convertToSlug(str) {
+      str = str.replace(/^\s+|\s+$/g, '');
+      str = str.toLowerCase();
+
+      var from = "ãàáäâẽèéëêìíïıîõòóöôùúüûñçşğ·/_,:;";
+      var to   = "aaaaaeeeeeiiiiiooooouuuuncsg------";
+      for (var i = 0, l = from.length; i < l; i++) {
+        str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+      }
+
+      str = str.replace(/[^a-z0-9 -]/g, '')
+               .replace(/\s+/g, '-')
+               .replace(/-+/g, '-');
+
+      return str;
+    }
+    
+    $('#name').on("keyup", function(){
+       const value = $('#name').val();
+        
+       $('#slug_name').val(convertToSlug(value));
+    });
+</script>
