@@ -1,2 +1,1 @@
-# blog
-blog.trugedrop.xyz
+# TrugeDrop
